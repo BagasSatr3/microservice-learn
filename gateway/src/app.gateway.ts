@@ -2,7 +2,7 @@
 import { WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
-@WebSocketGateway(3300)
+@WebSocketGateway(30333, { cors: true })
 export class AppGateway {
   @WebSocketServer() server: Server;
 

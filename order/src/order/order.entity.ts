@@ -9,7 +9,7 @@ export class Order {
     @Column()
     date: string;
 
-    @Column()
+    @Column({ default: "pending" })
     status: string;
 
     @Column({ default: 0 })

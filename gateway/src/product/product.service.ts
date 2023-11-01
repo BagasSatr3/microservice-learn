@@ -4,6 +4,7 @@ import { ProductMicroservice } from 'libs/api';
 
 @Injectable()
 export class ProductService {
+    
     async getProductAll() {
         const response = await ProductMicroservice.get('/products')
         return response.data

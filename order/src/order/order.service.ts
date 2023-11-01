@@ -16,7 +16,10 @@ export class OrderService {
 
     findMany() {
         return this.orderRepository.find({
-            relations: ["orderItems"]
+            relations: ["orderItems"],
+            where: {
+                status: "pending"
+            }
         })
     }
 

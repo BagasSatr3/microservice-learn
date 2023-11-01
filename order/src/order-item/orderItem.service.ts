@@ -6,7 +6,9 @@ import { CreateOrderItemDto } from "./dtos/create-orderItem.dto";
 
 @Injectable()
 export class OrderItemService {
-    constructor(@InjectRepository(OrderItem) private readonly orderItemRepository: Repository<OrderItem>) {}
+    constructor(
+        @InjectRepository(OrderItem) private readonly orderItemRepository: Repository<OrderItem>
+        ) {}
 
     async create(dto: CreateOrderItemDto) {
         const orderItem = this.orderItemRepository.create(dto);
