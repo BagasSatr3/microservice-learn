@@ -4,8 +4,9 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { OrderModule } from './order/order.module';
-import { join } from 'path';
 import { OrderItemModule } from './order-item/orderItem.module';
+import { Order } from './order/order.entity';
+import { OrderItem } from './order-item/orderItem.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { OrderItemModule } from './order-item/orderItem.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
-        entities: [join(process.cwd(), 'dist/**/*.entity.js')],
+        entities: [Order, OrderItem],
         synchronize: true,
       }),
       inject: [ConfigService],

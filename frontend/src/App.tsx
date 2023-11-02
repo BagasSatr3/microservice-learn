@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Card, CardBody, CardFooter, Divider, Grid, GridItem, Heading, Image, Input, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, CardFooter, Divider, Grid, GridItem, Heading, Image, Stack, Text } from '@chakra-ui/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react'
 import { io } from 'socket.io-client';
@@ -28,9 +28,9 @@ function App() {
   async function fetchData() {
     try {
       if (orderToken) {
-        await fetch(`http://localhost:3000/products/cache/ddddddddd/${orderToken}`);
+        await fetch(`https://cafe-gateway.vercel.app/products/cache/ddddddddd/${orderToken}`);
       } else {
-        await fetch(`http://localhost:3000/products/cache/ddddddddd`);
+        await fetch(`https://cafe-gateway.vercel.app/products/cache/ddddddddd`);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -40,11 +40,11 @@ function App() {
   async function setOrderItem(productId: number, subtotal: number) {
     try {
       if(!orderToken) {
-        const order = await axios.post('http://localhost:3000/orders', {
+        const order = await axios.post('https://cafe-gateway.vercel.app/orders', {
           date: new Date()
         })
         localStorage.setItem('order-token', `${order.data.id}`)
-        await axios.post(`http://localhost:3000/orderItems/cache/ddddddddd/${order.data.id}`, {
+        await axios.post(`https://cafe-gateway.vercel.app/orderItems/cache/ddddddddd/${order.data.id}`, {
           quantity: 1,
           subtotal: subtotal,
           productId: productId,
@@ -53,7 +53,7 @@ function App() {
       } else {
         console.log("this is order token: ",orderToken);
         
-        await axios.post(`http://localhost:3000/orderItems/cache/ddddddddd/${orderToken}`, {
+        await axios.post(`https://cafe-gateway.vercel.app/orderItems/cache/ddddddddd/${orderToken}`, {
           quantity: 1,
           subtotal: subtotal,
           productId: productId,
