@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ProductsModule } from './products/products.module';
-import { join } from 'path';
+import { Product } from './products/product.entity';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { join } from 'path';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
-        entities: [join(process.cwd(), 'dist/**/*.entity.js')],
+        entities: [Product],
         synchronize: true,
       }),
       inject: [ConfigService],
