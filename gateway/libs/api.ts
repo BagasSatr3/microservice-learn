@@ -1,9 +1,9 @@
 import axios from "axios";
 
 export const ProductMicroservice = axios.create({
-    baseURL: 'https://cafe-product.vercel.app/'
+    baseURL: 'http://localhost:30022'
   });
 
 export const OrderMicroservice = axios.create({
-    baseURL: 'https://cafe-order.vercel.app/'
+    baseURL: 'http://localhost:30011'
   });

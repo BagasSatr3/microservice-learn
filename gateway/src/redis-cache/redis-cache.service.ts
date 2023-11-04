@@ -14,9 +14,9 @@ export class RedisCacheService {
     }
 
     async set(key: string, value: any, ttl: number) {
-        console.log("set value: ",value);
+        // console.log("set value: ",value);
         const serializedValue = JSON.stringify(value);
-        console.log("set serializedValue:", serializedValue);
+        // console.log("set serializedValue:", serializedValue);
         await this.redisClient.setex(key, ttl, serializedValue)
     }
 
@@ -25,9 +25,9 @@ export class RedisCacheService {
     }
 
     async get(key: string) {
-        console.log(key);
+        // console.log(key);
         const serializedValue = await this.redisClient.get(key)
-        console.log(serializedValue);
+        // console.log(serializedValue);
         if (serializedValue) {
             return serializedValue
         }

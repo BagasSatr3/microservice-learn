@@ -2,12 +2,16 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { AppGateway } from 'src/app.gateway';
+import { RedisCacheService } from 'src/redis-cache/redis-cache.service';
+import { ProductService } from 'src/product/product.service';
 
 @Controller('orders')
 export class OrderController {
     constructor(
+        private readonly productService: ProductService,
         private readonly orderService: OrderService,
         private readonly appGateway: AppGateway,
+        private readonly redisCacheService: RedisCacheService,
     ) {}
 
     @Get()
@@ -24,17 +28,31 @@ export class OrderController {
         return order
     }
     
-    @Post() 
-    async createOrder(@Body() dto: CreateOrderDto) {
-        const order = this.orderService.createOrder(dto)
-        this.appGateway.handleMessage(null, order);
-        return order
+    @Post('cache/:key') 
+    async createOrder(@Body() dto: CreateOrderDto, @Param('key') key: string) {
+        await this.redisCacheService.del(key);
+        const orderId = await this.orderService.createOrder(dto)
+        console.log("order id",orderId.id)
+
+        // Handle the case when data is not found in the cache
+        const product = await this.productService.getProductAll();
+        const order = await this.orderService.getOrderItemWithProduct(`${orderId.id}`);
+
+        const combinedData = { product, order };
+
+        await this.redisCacheService.set(key, combinedData, 3600);
+        const cachedValue = await this.redisCacheService.get(key);
+
+        const parsedData = JSON.parse(cachedValue);
+            const combinedDatab = { product: parsedData.product, order: parsedData.order };
+        this.appGateway.handleMessage(null, combinedDatab);
+
+        return orderId;
     }
     
     @Patch(":orderId") 
     async updateOrder(@Param('orderId') orderId: any, @Body() dto: CreateOrderDto) {
         const order = this.orderService.updateOrder(orderId, dto)
-        this.appGateway.handleMessage(null, order);
         return order
     }
     

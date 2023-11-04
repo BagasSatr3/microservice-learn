@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardBody, CardFooter, Divider, Grid, GridItem, Heading, Image, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, CardFooter, Divider, Grid, GridItem, Heading, Image, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Stack, Text, useDisclosure } from '@chakra-ui/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react'
 import { io } from 'socket.io-client';
@@ -20,17 +20,26 @@ interface IOrder {
 }
 
 function App() {
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const [product, setProduct] = useState<IProduct[]>([])
   const [order, setOrder] = useState<IOrder[]>([])
 
+  const [orderTokenState, setOrderTokenState] = useState('')
+
   const orderToken = localStorage.getItem('order-token')
+  const time = String(new Date().getTime())
+  const timeOrder = localStorage.getItem("time")
 
   async function fetchData() {
     try {
+     
+      if (!timeOrder) {
+        localStorage.setItem("time", time)
+      }
       if (orderToken) {
-        await fetch(`https://cafe-gateway.vercel.app/products/cache/ddddddddd/${orderToken}`);
+        await fetch(`http://localhost:3000/products/cache/${timeOrder}/${orderToken}`);
       } else {
-        await fetch(`https://cafe-gateway.vercel.app/products/cache/ddddddddd`);
+        await fetch(`http://localhost:3000/products/cache/${timeOrder}`);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -40,30 +49,47 @@ function App() {
   async function setOrderItem(productId: number, subtotal: number) {
     try {
       if(!orderToken) {
-        const order = await axios.post('https://cafe-gateway.vercel.app/orders', {
-          date: new Date()
+        const order = await axios.post(`http://localhost:3000/orders/cache/${time}`, {
+          date: new Date(),
         })
+        setOrderTokenState(order.data.id)
         localStorage.setItem('order-token', `${order.data.id}`)
-        await axios.post(`https://cafe-gateway.vercel.app/orderItems/cache/ddddddddd/${order.data.id}`, {
+        await axios.post(`http://localhost:3000/orderItems/cache/${timeOrder}/${orderTokenState}`, {
           quantity: 1,
           subtotal: subtotal,
           productId: productId,
-          order: order,
+          order: order.data.id,
         })
       } else {
         console.log("this is order token: ",orderToken);
         
-        await axios.post(`https://cafe-gateway.vercel.app/orderItems/cache/ddddddddd/${orderToken}`, {
+        await axios.post(`http://localhost:3000/orderItems/cache/${timeOrder}/${orderToken}`, {
           quantity: 1,
           subtotal: subtotal,
           productId: productId,
           order: orderToken
         })
       }
+      // await axios.post(`http://localhost:3000/orderItems/cache/${timeOrder}/${orderToken}`, {
+      //     quantity: 1,
+      //     subtotal: subtotal,
+      //     productId: productId,
+      //     order: orderToken
+      //   })
     } catch (error) {
       console.error('Error setting order item:', error);
     }
     
+  }
+
+  async function orderConfirm() {
+    await axios.patch(`http://localhost:3000/orders/${orderToken}`, {
+          status: "completed",
+    })
+    localStorage.removeItem("order-token")
+    localStorage.removeItem("time")
+    setOrder([])
+    localStorage.setItem("time", time)
   }
 
 
@@ -139,6 +165,7 @@ function App() {
         },
       }}
       >
+        <Text>{orderToken}</Text>
       {order && order.length > 0 ? (
       order.map((data) => (
         <Card m={2} key={data.id} position={'sticky'}>
@@ -167,9 +194,20 @@ function App() {
           <CardBody>
             <Text>Total: Rp. 10000.</Text>
           </CardBody>
-            <Button>Confirm</Button>
+            <Button onClick={onOpen}>Confirm</Button>
+            <Button mt={2} onClick={orderConfirm}>Make an Order</Button> 
         </Card>
       </Box>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm the Order</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Button onClick={() => { orderConfirm(); onClose(); }}>Confirm</Button>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   )
 }
